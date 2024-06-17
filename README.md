@@ -1,2 +1,2 @@
 # __private_testing
-MoonWolf testing for GitHub functionality
+NoonWolfによる、なでしこ３の研究
