@@ -1,5 +1,12 @@
 {
 
+一番シンプルなToDoListの作成：
+Form1にMemo1、
+Edit1、Button1（Edit1の内容をMemo1にAppend）、
+Button2(ファイルにMemo1の内容を書き込み)、
+Button3（ファイルからMemo1に内容を読み込み）
+
+
 ファイル関係
 
 1. ファイル変数の定義	var F: TextFile;
