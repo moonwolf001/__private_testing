@@ -6,6 +6,7 @@ Edit1、Button1（Edit1の内容をMemo1にAppend）、
 Button2(ファイルにMemo1の内容を書き込み)、
 Button3（ファイルからMemo1に内容を読み込み）
 
+※Memo1のインデックスについて、１行目を0と数える。２行目が1。このずれに注意すること。
 
 ファイル関係
 
