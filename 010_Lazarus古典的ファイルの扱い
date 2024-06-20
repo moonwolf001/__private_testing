@@ -1,0 +1,121 @@
+{
+
+ファイル関係
+
+1. ファイル変数の定義	var F: TextFile;
+2. ファイル名の定義	var FileName: string;
+3. ファイルの関連付け	AssignFile(F, FileName);
+4. 新規作成or上書き	Rewrite(F);
+5. ファイルの読み取り	Reset(F);
+6. ファイルの書き込み	Writeln(F, text_data);
+7. ファイルの閉鎖	CloseFile(F);
+8. 行データの定義	var text_data: string;
+
+}
+
+unit Unit1;
+
+interface
+
+uses
+  Classes, SysUtils, FileUtil, Forms, Controls, Graphics, Dialogs, StdCtrls;
+
+type
+
+  { TForm1 }
+
+  TForm1 = class(TForm)
+    Button1: TButton;
+    Button2: TButton;
+    Button3: TButton;
+    Edit1: TEdit;
+    Memo1: TMemo;
+    procedure Button1Click(Sender: TObject);
+    procedure Button2Click(Sender: TObject);
+    procedure Button3Click(Sender: TObject);
+  private
+
+  public
+
+  end;
+
+var
+  Form1: TForm1;
+
+implementation
+
+{$R *.lfm}
+
+{ TForm1 }
+
+procedure TForm1.Button1Click(Sender: TObject);
+begin
+  if Edit1.Text <> '' then
+  begin
+    Memo1.Lines.Append(Edit1.Text);
+    Edit1.Clear;
+  end
+  else
+    ShowMessage('ToDoを入力してください。');
+end;
+
+procedure TForm1.Button2Click(Sender: TObject);
+var
+  FileName: string;
+  F: TextFile;
+  i: Integer;
+begin
+  FileName := 'data.txt';
+  if not FileExists(FileName) then
+  begin
+    if MessageDlg('ファイルが存在しません。新しくファイルを作成しますか？', mtConfirmation, [mbYes, mbNo], 0) = mrYes then
+    begin
+      AssignFile(F, FileName);
+      Rewrite(F);
+      CloseFile(F);
+    end
+    else
+      Exit;
+  end;
+
+  AssignFile(F, FileName);
+  Rewrite(F);
+  try
+    for i := 0 to Memo1.Lines.Count - 1 do
+    begin
+      Writeln(F, Memo1.Lines[i]);
+    end;
+  finally
+    CloseFile(F);
+  end;
+
+  ShowMessage('ToDoリストが保存されました。');
+end;
+
+procedure TForm1.Button3Click(Sender: TObject);
+var
+  FileName: string;
+  F: TextFile;
+  Line: string;
+begin
+  FileName := 'data.txt';
+  if FileExists(FileName) then
+  begin
+    AssignFile(F, FileName);
+    Reset(F);
+    try
+      Memo1.Lines.Clear;
+      while not Eof(F) do
+      begin
+        Readln(F, Line);
+        Memo1.Lines.Add(Line);
+      end;
+    finally
+      CloseFile(F);
+    end;
+  end
+  else
+    ShowMessage('ファイルが存在しません。');
+end;
+
+end.
