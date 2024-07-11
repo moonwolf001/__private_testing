@@ -1,0 +1,103 @@
+// Pascalプログラミング
+
+// MoonWolf  ボタンバウンド・シミュレーション, 2024,7,12
+// *** setting ***
+// form1 600 x 500 pixel
+// button1 約50 x 50 pixcel
+// System/Timer1 をForm1上に置く
+// オブジェクトインスペクターで、Form1 onCreate + Timer1 onTimer
+
+unit Unit1;
+
+interface
+
+uses
+  Classes, SysUtils, Forms, Controls, Graphics, Dialogs, StdCtrls, ExtCtrls;
+
+type
+
+  { TForm1 }
+
+  TForm1 = class(TForm)
+    Button1: TButton;
+    Timer1: TTimer;
+    procedure FormCreate(Sender: TObject);       // OBJ Ins 設定
+    procedure Timer1Timer(Sender: TObject);      // OBJ Ins 設定
+  private
+    { private declarations }
+    vx, vy: Double; // ボタンの速度を表す変数
+  public
+    { public declarations }
+  end;
+
+var
+  Form1: TForm1;
+
+const
+  // 初期位置と初速度を設定する定数
+  InitPosX = 0; // ボタンの初期X座標
+  InitPosY = 0; // ボタンの初期Y座標
+  InitSpeedX = 20; // ボタンの初期X方向速度
+  InitSpeedY = 0; // ボタンの初期Y方向速度
+  ElasticityWall = 0.99; // 壁との弾性率（衝突後の速度の維持率）
+  ElasticityFloor = 0.96; // 床との弾性率
+
+implementation
+
+{$R *.lfm}
+
+// このFromCreateは非常に重要！From1生成時に１回だけ事項される。プログラムの初期化として使える。
+procedure TForm1.FormCreate(Sender: TObject);
+begin
+  // MoonWolf ：君たち準備はいいかい＾？
+
+  // フォームのサイズを設定
+  Form1.Width := 600;
+  Form1.Height := 500;
+
+  // Button1の初期位置とサイズを設定
+  Button1.Width := 50; // ボタンの幅
+  Button1.Height := 50; // ボタンの高さ
+  Button1.Left := InitPosX; // ボタンの初期X座標
+  Button1.Top := InitPosY; // ボタンの初期Y座標
+
+  // 初速度を設定
+  vx := InitSpeedX; // X方向の初速度
+  vy := InitSpeedY; // Y方向の初速度
+
+  // タイマーの設定
+  Timer1.Interval := 20; // 20msごとに更新
+  Timer1.Enabled := True; // タイマーを有効にする
+end;
+
+procedure TForm1.Timer1Timer(Sender: TObject);
+begin
+  // 位置の更新（現在の位置に速度を加算して新しい位置を計算）
+  Button1.Left := Button1.Left + Round(vx); // 新しいX座標を計算
+  Button1.Top := Button1.Top + Round(vy); // 新しいY座標を計算
+
+  // 壁との衝突判定
+  if (Button1.Left <= 0) or (Button1.Left + Button1.Width >= Form1.Width) then
+  begin
+    vx := -vx * ElasticityWall; // X方向の速度を反転し、弾性率を掛ける
+    if Button1.Left <= 0 then
+      Button1.Left := 0 // 左の壁に衝突した場合、位置を修正
+    else
+      Button1.Left := Form1.Width - Button1.Width; // 右の壁に衝突した場合、位置を修正
+  end;
+
+  // 床との衝突判定
+  if (Button1.Top <= 0) or (Button1.Top + Button1.Height >= Form1.Height) then
+  begin
+    vy := -vy * ElasticityFloor; // Y方向の速度を反転し、弾性率を掛ける
+    if Button1.Top <= 0 then
+      Button1.Top := 0 // 天井に衝突した場合、位置を修正
+    else
+      Button1.Top := Form1.Height - Button1.Height; // 床に衝突した場合、位置を修正
+  end;
+
+  // 重力の影響を追加（Y方向の速度に重力加速度を加算）
+  vy := vy + 0.501; // 重力加速度を考慮した速度更新
+end;
+
+end.
