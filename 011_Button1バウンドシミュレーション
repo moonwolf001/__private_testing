@@ -1,0 +1,99 @@
+// Pascalプログラミング
+
+// MoonWolf  ボタンバウンド・シミュレーション, 2024,7,12
+// *** setting ***
+// form1 600 x 500 pixel
+// button1 約50 x 50 pixcel
+// System/Timer1 をForm1上に置く
+// このコードをCopy&Pasteした後に、オブジェクトインスペクターで、Form1 onCreate + Timer1 onTimer
+
+unit Unit1;
+
+interface
+
+uses
+  Classes, SysUtils, Forms, Controls, Graphics, Dialogs, StdCtrls, ExtCtrls;
+
+type
+
+  { TForm1 }
+
+  TForm1 = class(TForm)
+    Button1: TButton;
+    Timer1: TTimer;
+    procedure FormCreate(Sender: TObject);
+    procedure Timer1Timer(Sender: TObject);
+  private
+    { private declarations }
+    vx, vy: Double;
+  public
+    { public declarations }
+  end;
+
+var
+  Form1: TForm1;
+
+const
+  InitPosX = 0;
+  InitPosY = 0;
+  InitSpeedX = 20;
+  InitSpeedY = 0;
+  ElasticityWall = 0.99;
+  ElasticityFloor = 0.96;
+
+implementation
+
+{$R *.lfm}
+
+procedure TForm1.FormCreate(Sender: TObject);
+begin
+  // フォームのサイズを設定
+  Form1.Width := 600;
+  Form1.Height := 500;
+
+  // Button1の初期位置とサイズを設定
+  Button1.Width := 50;
+  Button1.Height := 50;
+  Button1.Left := InitPosX;
+  Button1.Top := InitPosY;
+
+  // 初速度を設定
+  vx := InitSpeedX;
+  vy := InitSpeedY;
+
+  // タイマーの設定
+  Timer1.Interval := 20; // 20msごとに更新
+  Timer1.Enabled := True;
+end;
+
+procedure TForm1.Timer1Timer(Sender: TObject);
+begin
+  // 位置の更新
+  Button1.Left := Button1.Left + Round(vx);
+  Button1.Top := Button1.Top + Round(vy);
+
+  // 壁との衝突判定
+  if (Button1.Left <= 0) or (Button1.Left + Button1.Width >= Form1.Width) then
+  begin
+    vx := -vx * ElasticityWall;
+    if Button1.Left <= 0 then
+      Button1.Left := 0
+    else
+      Button1.Left := Form1.Width - Button1.Width;
+  end;
+
+  // 床との衝突判定
+  if (Button1.Top <= 0) or (Button1.Top + Button1.Height >= Form1.Height) then
+  begin
+    vy := -vy * ElasticityFloor;
+    if Button1.Top <= 0 then
+      Button1.Top := 0
+    else
+      Button1.Top := Form1.Height - Button1.Height;
+  end;
+
+  // 重力の影響を追加
+  vy := vy + 0.501; // 重力加速度
+end;
+
+end.
