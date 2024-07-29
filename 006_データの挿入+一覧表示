@@ -1,0 +1,57 @@
+SQL DB の学習入門　2024
+sqlite3
+※文末には; をつけること
+
+
+＜テーブルの作成＞
+CREATE TABLE people (
+    id INTEGER PRIMARY KEY,
+    name TEXT,
+    age INTEGER,
+    gender TEXT CHECK(gender IN ('male', 'female')),
+    city TEXT
+);
+
+＜データの挿入＞
+INSERT INTO people (name, age, gender, city) VALUES ('MoonWolf', 40, 'male', 'Tokyo');
+INSERT INTO people (name, age, gender, city) VALUES ('C215メアリー', 20, 'female', 'CosmicSunder');
+INSERT INTO people (name, age, gender, city) VALUES ('BSR社長', 58, 'male', 'CosmicSunder');
+INSERT INTO people (name, age, gender, city) VALUES ('戦闘員A', 35, 'male', 'CosmicBlue');
+INSERT INTO people (name, age, gender, city) VALUES ('戦闘員B', 39, 'male', 'CosmicBlue');
+INSERT INTO people (name, age, gender, city) VALUES ('司令塔員A', 28, 'female', 'CosmicApple');
+
+
+＜データの閲覧＞
+SELECT * FROM people;
+
+＜データの閲覧例＞
+sqlite> select * from people ;
+1|MoonWolf|40|male|Tokyo
+2|C215メアリー|20|female|CosmicSunder
+3|TMY|17|male|Kiryu
+4|戦闘員A|35|male|CosmicBlue
+5|戦闘員B|39|male|CosmicBlue
+6|司令塔員A|28|female|CosmicApple
+
+＜条件つきデータ閲覧例＞
+sqlite> select * from people where age >18;
+1|MoonWolf|40|male|Tokyo
+2|C215メアリー|20|female|CosmicSunder
+4|戦闘員A|35|male|CosmicBlue
+5|戦闘員B|39|male|CosmicBlue
+6|司令塔員A|28|female|CosmicApple
+
+＜ワイルドカードを使た閲覧例＞
+SELECT * FROM people WHERE city LIKE 'cos%';
+2|C215メアリー|20|female|CosmicSunder
+4|戦闘員A|35|male|CosmicBlue
+5|戦闘員B|39|male|CosmicBlue
+6|司令塔員A|28|female|CosmicApple
+
+＜複数条件による検索結果の表示例＞
+sqlite> SELECT * FROM people WHERE city LIKE 'cos%' and gender='male';
+4|戦闘員A|35|male|CosmicBlue
+5|戦闘員B|39|male|CosmicBlue
+
+＜テーブルのデータの変更＞
+UPDATE people SET age = 37 WHERE name = '戦闘員A';
