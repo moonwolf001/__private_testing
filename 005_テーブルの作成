@@ -1,0 +1,7 @@
+CREATE TABLE people (
+    id INTEGER PRIMARY KEY,
+    name TEXT,
+    age INTEGER,
+    gender TEXT CHECK(gender IN ('male', 'female')),
+    city TEXT
+);
