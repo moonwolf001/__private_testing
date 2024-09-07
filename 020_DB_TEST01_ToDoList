@@ -1,0 +1,172 @@
+// MoonWolf SQL DB + Lazarus研究　もっともシンプルな例 ToDoList
+// 2024.SEP.7
+// はまった点：ChatGPT4が解決できなかった点
+// Lazarus 3.0 or higher として世界中を検索させた
+//
+// DBGrid でテキスト文字を(MEMO)と表示 -> DBGrid Option dgDisplayMemoText = True
+// DBGrid に表示される内容に合わせたフィールド幅 -> DBGrid Option dgAutoSizeColumns = Ture
+//
+// 基本：SQLiteConnection1 + SQLTransacation1 + SQLQuery + DataSource + DBGrid
+//       ↑ここのConnectionさえ変えれば、他のDBにも対応できる
+//
+// SQLite3 でのテーブル設定
+// DB file TEST01
+// Table ToDoList1
+//   ID Integer primary key
+//   Contents  Text
+
+
+unit Unit1;
+
+{$mode objfpc}{$H+}
+
+interface
+
+uses
+  Classes, SysUtils, sqlite3conn, sqldb, db, Forms, Controls, Graphics, Dialogs,
+  DBGrids, StdCtrls;
+
+const
+  Version = 'Ver 1.00 2024.9' ;
+    // 初リリース、最もシンプルなもの
+
+type
+
+  { TForm1 }
+
+  TForm1 = class(TForm)
+    Button1: TButton;
+    DBGrid1: TDBGrid;
+    Edit1: TEdit;
+    DataSource1: TDataSource;
+    SQLite3Connection1: TSQLite3Connection;
+    SQLQuery1: TSQLQuery;
+    SQLTransaction1: TSQLTransaction;
+    procedure Button1Click(Sender: TObject);
+    procedure DBGrid1DblClick(Sender: TObject);
+    procedure FormCreate(Sender: TObject);
+  private
+
+  public
+
+  end;
+
+var
+  Form1: TForm1;
+
+implementation
+
+{$R *.lfm}
+
+{ TForm1 }
+
+// データベース接続および既存のデータをDBGridに表示
+procedure TForm1.FormCreate(Sender: TObject);
+begin
+  caption := 'MoonWolf ToDoList / Sqlite3 / ダブルクリックでデータ削除可能  '+Version;
+  try
+    // データベース接続の設定
+    SQLite3Connection1.DatabaseName := 'C:\_LAZARUS_APP\test60_SQLDB_004_ToDoList3\TEST01';  // 拡張子なしファイル名
+    SQLite3Connection1.Connected := True;
+
+    // トランザクションを有効化
+    SQLTransaction1.DataBase := SQLite3Connection1;
+    SQLTransaction1.Active := True;  // トランザクションを開始
+
+    // フィールドの定義を手動で設定
+    SQLQuery1.Close;  // クエリがまだ開かれていないことを確認
+    SQLQuery1.SQL.Text := 'SELECT * FROM ToDoList1';
+    SQLQuery1.Transaction := SQLTransaction1;  // トランザクションを明示的に設定
+
+    // フィールド定義を設定
+    SQLQuery1.FieldDefs.Clear;
+    SQLQuery1.FieldDefs.Add('ID', ftInteger);  // IDフィールドは整数型
+    SQLQuery1.FieldDefs.Add('Contents', ftString, 255);  // Contentsフィールドはテキスト型（最大255文字）
+
+    // クエリの実行
+    SQLQuery1.Open;  // クエリを実行し、DBGridに表示
+
+    ShowMessage('データベース接続とクエリ実行に成功しました');
+  except
+    on E: Exception do
+      ShowMessage('エラー: ' + E.Message);  // エラーの詳細を表示
+  end;
+
+
+    // カラムの幅を手動で設定
+  //DBGrid1.Columns[0].Width := 50;
+  //DBGrid1.Columns[1].Width := 400;
+
+
+end;
+
+
+// Button1Click でEdit1に入力された内容をデータベースに追加
+procedure TForm1.Button1Click(Sender: TObject);
+begin
+  try
+    // 挿入前に既存のクエリを閉じる
+    if SQLQuery1.Active then
+      SQLQuery1.Close;
+
+    // データベースに新しいタスクを挿入
+    SQLQuery1.SQL.Text := 'INSERT INTO ToDoList1 (contents) VALUES (:contents)';
+    SQLQuery1.Params.ParamByName('contents').AsString := Edit1.Text;
+    SQLQuery1.ExecSQL;  // クエリを実行
+
+    // トランザクションをコミットしてロックを解除
+    SQLTransaction1.Commit;
+
+    // クエリを再実行してDBGridを更新
+    SQLQuery1.SQL.Text := 'SELECT id, contents FROM ToDoList1';
+    SQLQuery1.Open;
+
+    ShowMessage('タスクが追加されました');
+  except
+    on E: Exception do
+      ShowMessage('エラー: ' + E.Message);
+  end;
+end;
+
+procedure TForm1.DBGrid1DblClick(Sender: TObject);
+var
+  selectedContent: string;
+  selectedID: Integer;
+  userResponse: Integer;
+begin
+  // 現在選択されているレコードのIDとContentsを取得
+  selectedID := SQLQuery1.FieldByName('ID').AsInteger;
+  selectedContent := SQLQuery1.FieldByName('Contents').AsString;
+
+  // ユーザーに削除確認を表示
+  userResponse := MessageDlg('このレコードを削除しますか？' + sLineBreak +
+    'ID: ' + IntToStr(selectedID) + sLineBreak +
+    '内容: ' + selectedContent, mtConfirmation, [mbYes, mbNo], 0);
+
+  // ユーザーが「消す」を選択した場合
+  if userResponse = mrYes then
+  begin
+    try
+      // 該当レコードを削除する
+      SQLQuery1.Close;
+      SQLQuery1.SQL.Text := 'DELETE FROM ToDoList1 WHERE ID = :ID';
+      SQLQuery1.Params.ParamByName('ID').AsInteger := selectedID;
+      SQLQuery1.ExecSQL;
+
+      // トランザクションをコミットして変更を確定
+      SQLTransaction1.Commit;
+
+      // DBGridを更新する
+      SQLQuery1.SQL.Text := 'SELECT * FROM ToDoList1';
+      SQLQuery1.Open;
+
+      ShowMessage('レコードが削除されました');
+    except
+      on E: Exception do
+        ShowMessage('エラー: ' + E.Message);  // エラーメッセージを表示
+    end;
+  end;
+end;
+
+
+end.
