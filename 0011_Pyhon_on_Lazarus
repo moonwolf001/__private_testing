@@ -1,0 +1,82 @@
+// Pyhon on Lazarus
+
+unit Unit1;
+
+{$mode objfpc}{$H+}
+
+interface
+
+uses
+  Classes, SysUtils, Process, Forms, Controls, Graphics, Dialogs, StdCtrls;
+
+type
+  { TForm1 }
+
+  TForm1 = class(TForm)
+    Button1: TButton;
+    Label1: TLabel;
+    Label3: TLabel;
+    Label4: TLabel;
+    Memo1: TMemo;
+    Memo2: TMemo;
+    procedure Button1Click(Sender: TObject);
+    procedure Label1Click(Sender: TObject);
+  private
+
+  public
+
+  end;
+
+var
+  Form1: TForm1;
+
+implementation
+
+{$R *.lfm}
+
+{ TForm1 }
+
+procedure TForm1.Button1Click(Sender: TObject);
+var
+  AProcess: TProcess;
+  OutputString: TStringList;
+  PythonCode: TStringList;
+  TempFile: string;
+begin
+  // Pythonコードを一時ファイルに保存
+  PythonCode := TStringList.Create;
+  try
+    PythonCode.Text := Memo1.Lines.Text;
+    TempFile := GetTempFileName + '.py';
+    PythonCode.SaveToFile(TempFile);
+
+    // TProcessを使ってPythonスクリプトを実行
+    AProcess := TProcess.Create(nil);
+    OutputString := TStringList.Create;
+    try
+      AProcess.Executable := 'py';  // Pythonの実行ファイル (Pathが設定されている場合)
+      AProcess.Parameters.Add(TempFile);  // 一時ファイルを実行
+      AProcess.Options := AProcess.Options + [poWaitOnExit, poUsePipes];
+      AProcess.Execute;
+
+      // 実行結果を取得
+      OutputString.LoadFromStream(AProcess.Output);
+      Memo2.Lines.Text := OutputString.Text;  // 実行結果をMemo2に表示
+
+    finally
+      AProcess.Free;
+      OutputString.Free;
+      DeleteFile(TempFile);  // 一時ファイルを削除
+    end;
+
+  finally
+    PythonCode.Free;
+  end;
+end;
+
+procedure TForm1.Label1Click(Sender: TObject);
+begin
+
+end;
+
+end.
