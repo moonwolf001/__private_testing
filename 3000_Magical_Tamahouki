@@ -1,0 +1,529 @@
+
+#include "hsp3dish.as"
+#include "hsptvapp_dish.as"
+
+	;
+	;		TamaHouki (HSP3Dish)
+	;		シューティングゲームのサンプル。(HSP3.6以降用)
+	;		カーソルキーで移動、スペースで発射
+	;		webアプリとして変換する場合は、
+	;		「#define GAME_DEBUG」の先頭に「;」を入れてください
+	;
+	;------------------------------------------------------------------
+
+#define GAME_DEBUG
+
+#enum SE01=0
+#enum SE02
+#enum SE03
+#enum SE04
+#enum SE05
+#enum SE06
+#enum SE07
+#enum SE08
+#enum SE09
+#enum SE10
+#enum SE11
+#enum SE12
+#enum SE13
+#enum SE14
+#enum SE15
+#enum MUS01
+
+#packopt xsize  800
+#packopt ysize  480
+#packopt name "tamahouki"
+
+	randomize
+	wx=800:wy=480
+#ifdef GAME_DEBUG
+	screen 0,wx,wy				; スクリーン初期化
+	chdir "data"
+#endif
+	es_ini					; スプライト初期化
+
+	mmload "se01.wav",SE01
+	mmload "se02.wav",SE02
+	mmload "se03.wav",SE03
+	mmload "se04.wav",SE04
+	mmload "se05.wav",SE05
+	mmload "se06.wav",SE06
+	mmload "se07.wav",SE07
+	mmload "se08.wav",SE08
+	mmload "se09.wav",SE09
+	mmload "se10.wav",SE10
+	mmload "se11.wav",SE11
+	mmload "se12.wav",SE12
+	mmload "se13.wav",SE13
+	mmload "se14.wav",SE14
+	mmload "se15.wav",SE15
+	mmload "ok09.mp3",MUS01
+
+	rankmax=5
+	gameid=1
+	dim high,rankmax
+	netmode=1
+
+	hsptv_start "",gameid			; ネット接続時にはスタートアップコードを指定します
+
+	goto *boot
+
+*boot
+
+	chrsx=64:chrsy=64			; キャラクタのサイズを指定
+	fontsx=16:fontsy=16			; フォントのX,Yサイズ
+	texsx=32:texsy=30			; テキストのマップサイズ
+
+	celload "yamabg1.png",4
+	celload "yamabg2.png",5
+	bgsx=1024:bgsy=480
+	celload "afont16.png",6
+	celdiv 6,fontsx,fontsy			; マップのセル設定
+	celload "th_title2.png",7
+
+	buffer 3
+	picload "testchr.png"
+	es_size chrsx,chrsy,60
+	es_pat 0, 64,64			; 顔
+	es_pat 1, 192,0			; LASER
+	es_pat 2, 256,0			; MISSILE
+	es_pat 3, 320,0			; MISSILE
+	es_pat 18, 0,64			; PLAYER2
+	es_pat 19, 64,0			; APPLE
+	es_patanim 4,2,384,0,12	; ENEMY
+	es_patanim 10,4,256,64,2	; BOM
+	es_size 256,128,60
+	es_pat 7, 256,128		; BOSS
+	es_size 128,128,60
+	es_pat 20, 0,128		; CURSOR
+	es_pat 21, 0,128+128		; CURSOR
+	es_pat 22, 128,128		; CURSOR2
+	es_pat 23, 128,128+128		; CURSOR2
+
+
+	gsel 0
+	title "Magical TamaHouki v1.0"
+	high=0
+
+*gaccess
+	;	high score access
+	if netmode=0 : goto *gtitle
+
+	hsptv_up -1,""				; 最初に情報を更新しておく
+	notesel buf
+	repeat rankmax
+		hsptv_getrank i,name,comm,cnt
+		high(cnt)=i
+	loop
+
+*gtitle
+	mmstop
+	es_clear
+	clrobj
+	x=(wx-220)/2+100:y=280
+	objsize 220,110
+	pos x,y:button "START",*start
+	objsize 220,40
+	pos x,y+120:button "Tweet Score",*snsshare
+
+	gres=0:gwt=0
+	dim textbg,texsx*texsy			; マップデータ変数
+	es_bgmap 0,textbg,texsx,texsy,texsx,texsy,6	; マップ登録
+	es_bgmes 0,1,1,"PRESS START",96*2
+
+	if netmode=0 : goto *gtitle1
+
+	x=10:y=16
+	es_bgmes 0,x,y,"TOP "+rankmax,96*7
+	y+=2
+	no=1
+	repeat rankmax
+	es_bgmes 0,x,y,strf("#%d %06d",no,high(cnt)),96*7
+	y+=2:no++
+	loop
+
+*gtitle1
+	myx=180:myy=66
+	;es_set 0,myx,myy,18
+	;es_setrot 0,0,200,200
+
+*gtitle2
+	stick ky				; キーの情報を取得
+#ifdef GAME_DEBUG
+	if ky&$80 : goto *owari			; [ESC]中断チェック
+#endif
+	if ky&$30 : goto *start
+
+	es_bgmes 0,1,0,"SCORE "+score,96*5
+	es_bgmes 0,16,0,"HIGH "+high,96*6
+
+	redraw 0
+	;rgbcolor $404040:boxf
+	rgbcolor $071f9b:boxf
+
+	gmode 2,512,192
+	pos (wx-512)/2,36:gcopy 7
+
+	es_putbg 0,0,16				; マップを描画
+	es_draw					; スプライト描画
+
+	rgbcolor $ffffff
+	;pos 0,0:mes "SC:"+score			; 文字列を描画
+	pos 260,220:mes "Powered by HSP3 https://hsp.tv/"
+
+	redraw 1
+	await 1000/60				; タスク更新
+
+	goto *gtitle2
+
+*snsshare
+	url="https://hsp.tv/game/"
+	exec "https://twitter.com/share?text=Webブラウザでシューティングに挑戦、スコア"+score+"点に到達!&hashtags=tamahouki&url="+url+" ",16
+	goto *gtitle2
+
+*start
+	clrobj
+	es_clear
+	dim textbg,texsx*texsy			; マップデータ変数
+	es_bgmap 0,textbg,texsx,texsy,texsx,texsy,6	; マップ登録
+
+	es_gravity -1,0,$80
+	es_bound -1,160,2
+	es_opt 0,wy-32
+
+	myx=100:myy=100
+	es_set 0,myx,myy,0
+
+	afire_id=2
+	afire_flag=0
+	es_set afire_id,660,340,22
+	amove_id=3
+	es_set amove_id,wx,0,20
+	cur_mode=0:cur_x=0:cur_y=0
+
+	a=0:tt=0
+	bgx=0:bgx2=0:gcnt=0
+	gres=0:gwt=0
+	bos_win=1
+	gosub *init_boss
+
+	score=0
+	msl_rate=5
+	ene_rate=30
+
+	mmplay MUS01
+	mmplay SE15
+*gmain
+	stick ky,$13f				; キーの情報を取得
+#ifdef GAME_DEBUG
+	if ky&$80 : goto *owari			; [ESC]中断チェック
+#endif
+	gosub *pclick
+
+	es_bgmes 0,1,0,"SCORE "+score,96*5
+	es_bgmes 0,16,0,"HIGH "+high,96*6
+
+	redraw 0
+
+	gosub *rollbg
+	gosub *keychk
+	gosub *fire
+	gosub *enemy
+	gosub *exec_boss
+
+	es_chr afire_id,22+afire_flag
+
+	es_draw
+	es_putbg 0,0,16				; マップを描画
+
+	;rgbcolor $ffffff
+	;pos 0,0:mes "SC:"+score			; 文字列を描画
+
+	redraw 1
+	await 1000/60				; タスク更新
+
+	gcnt+
+	if gres=0 : goto *gmain
+	gwt++
+	if gwt<240 : goto *gmain
+
+	;	gameover
+	if score>high : high=score
+
+	if netmode=0 : goto *gtitle
+	if score < lowscore : goto *gtitle
+
+	;	ハイスコア更新
+	if netmode=0 : goto *gtitle
+
+	hsptv_user "USER"
+	comm=strf("%04d/%02d/%02d",gettime(0),gettime(1),gettime(3))
+	hsptv_up score, comm
+	goto *gaccess
+
+*owari
+	es_bye
+	end
+
+*enemy
+	;	敵の出現 & 移動
+	;
+	a=rnd(32)+64
+	es_find n,4,a:if n<0 : goto *noset	
+
+	;	敵ミサイル
+	;
+	if rnd(100)>msl_rate : goto *noset
+	es_getpos n,x,y
+	if x<240 : goto *noset
+	es_new a,128
+	es_set a,x,y,3
+	es_type a,8
+	es_aim a,myx,myy,600
+*noset
+	if gcnt\ene_rate : return
+
+	;	敵キャラ配置
+	;
+	es_new a,64:y=rnd(300)
+	if a<0 : return
+	es_set a,wx,y+60,4
+	es_type a,4
+	es_adir a,rnd(8)+44,400
+	return
+
+*fire
+	;	自機ミサイルHIT CHECK
+	;
+	chk_type=4+16
+	n=0
+	repeat
+	es_find n,2,n:if n=-1 : break		; ミサイルのスプライトを検出
+	es_check a,n,chk_type			; 衝突チェック
+	if a>=0 : gosub *firehit
+	n+
+	loop
+
+	;	自機ミサイル発射
+	;
+	if gres : return
+	if gcnt&3 : return			; 4回に1回ごとにチェック
+
+	if afire_flag : ky|=$10
+	if (ky&$10)=0 : return			; キーチェック
+
+	es_new a
+	es_set a,myx,myy,1
+	es_type a,2
+	es_adir a,rnd(4)+15,2000
+	return
+
+*firehit
+	es_kill n
+	if a=bos_id : goto *boshit
+	es_type a,0
+	es_chr a,10:es_flag a,20
+	score+=30
+	mmplay SE08
+	return
+*boshit
+	es_effect a,$5ff
+	bos_hp--
+	if bos_hp {
+		mmplay SE07
+		return
+	}
+	
+	es_getpos a,x,y
+	es_kill a
+	es_new a,64
+	if a<0 : return
+
+	es_set a,x+64,y,10
+	es_setrot a,0,200,200
+	es_flag a,20
+	bos_win++
+	msl_rate+=3
+	if msl_rate>90 : msl_rate=90
+	ene_rate=22-bos_win
+	if ene_rate<10 : ene_rate=10
+
+	score+=200+bos_win*130
+	gosub *init_boss
+	mmplay SE12
+
+	bos_item=30
+	bos_ix=x+32:bos_iy=y+32
+	return
+
+
+*rollbg
+	;	背景をスクロールしながら表示routine
+	;
+	bgx=bgx+1				; スクロールする速さ
+	if bgx>=bgsx : bgx-=bgsx
+	gmode 0,wx,wy
+	pos 0,0:gcopy 4,bgx,0
+	i=bgsx-bgx-1
+	if i<wx : pos i,0:gcopy 4,0,0
+	;
+	bgx2=bgx2+2				; スクロールする速さ
+	if bgx2>=bgsx : bgx2-=bgsx
+	gmode 2,wx,wy
+	pos 0,0:gcopy 5,bgx2,0
+	i=bgsx-bgx2-1
+	if i<wx : pos i,0:gcopy 5,0,0
+	;
+	return
+
+*init_boss
+	;		init boss
+	bos_timer=400+rnd(4)*30
+	bos_flag=bos_timer
+	bos_x=wx+16:bos_y=rnd(8)*50
+	bos_nx=300+rnd(10)*10
+	bos_hp=20+bos_win*12
+	bos_item=0
+
+	bos_id=1
+	bos_cnt=0
+	es_set bos_id,bos_x,bos_y,7
+	return
+
+*exec_boss
+	;		boss process
+	if bos_item {
+		bos_item--
+		es_new a,64
+		if a<0 : return
+		es_set a,bos_ix,bos_iy,19
+		es_flag a,$77f
+		es_type a,32
+		x=(rnd($4000)-$2000)*16
+		y=rnd($4000)*2+$80000
+		es_pos a,x,-y,ESSPSET_ADDPOS|ESSPSET_DIRECT
+	}
+	if bos_flag {
+		bos_flag--
+		return
+	}
+	es_type bos_id,16
+	es_getpos bos_id,x,y
+	if bos_cnt<4096 {
+		setease wx,bos_nx,ease_quad_inout
+		bos_cnt+=10
+		x=getease(bos_cnt)
+	}
+	if (gcnt&3)=0 {
+		i=y+32
+		if myy<i : y--
+		if myy>i : y++
+		es_effect bos_id
+	}
+	es_pos bos_id,x,y
+
+	if bos_win<7 : return
+
+	if (gcnt&$30)=0 {
+	    if (gcnt&7)=0 {
+		x+=32:y+=32
+		es_new a,128:es_set a,x,y,2:es_type a,8
+		es_adir a,32+14,600
+		;es_new a,128:es_set a,x,y,2:es_type a,8
+		;es_adir a,32+16,600
+		es_new a,128:es_set a,x,y,2:es_type a,8
+		es_adir a,32+18,600
+	    }
+	}
+	return
+
+*keychk
+	;	カーソルキー入力で自分(変数myx,myy)を動かすサブルーチン
+	;	(カーソルキーを同時に押すことにより斜めにも移動できます)
+	;
+	if gres : return
+	if cur_mode=1 : goto *setme
+	;
+	if ky&2 : goto *go_up			; 上を押しているか?
+	if ky&8 : goto *go_down			; 下を押しているか?
+	goto *keychk2				; 左右のチェックにジャンプ
+*go_up
+	if myy>-32 : myy-=4
+	goto *keychk2
+*go_down
+	if myy<380 : myy+=4
+*keychk2
+	if ky&1 : goto *go_left			; 左を押しているか?
+	if ky&4 : goto *go_right		; 右を押しているか?
+	goto *setme
+*go_left
+	if myx>-32 : myx-=4
+	goto *setme
+*go_right
+	if myx<580 : myx+=4
+*setme
+	es_pos 0,myx,myy			; スプライト座標設定
+
+	es_check a,0,32
+	if a>=0 {
+		es_kill a
+		mmplay SE14
+		score+=50
+		return
+	}
+
+	es_check a,0,12+16
+	if a<0 : return
+
+	;	自機やられ
+	;
+	mmplay SE10
+	gres=1
+	es_flag 0,30
+	es_chr 0,10
+
+	es_bgmes 0,1,1,"GAME OVER",96*2
+	return
+
+*pclick
+	if cur_mode=1 : goto *cursor_move
+	if cur_mode=2 : goto *cursor_afire
+
+	if (ky&$100)=0 : return
+	cur_x=mousex:cur_y=mousey
+
+	if cur_x>=660 {
+		if cur_y>=340 {
+			afire_flag^=1
+			cur_mode=2
+			return
+		}
+	}
+
+	cur_mode=1
+	es_pos amove_id,cur_x-64,cur_y-64
+	return
+
+*cursor_move
+	if ky&$100 {
+		x=limit(cur_x-mousex,-64,64)*$1000
+		y=limit(cur_y-mousey,-64,64)*$1000
+		es_getpos 0,myx,myy,ESSPSET_DIRECT
+		myx-=x:myy-=y
+		es_pos 0,myx,myy,ESSPSET_DIRECT
+		es_getpos 0,myx,myy
+		if myx<-32 : myx=-32
+		if myx>580 : myx=580
+		if myy<-32 : myy=-32
+		if myy>380 : myy=380
+		return
+	}
+	cur_mode=0
+	es_pos amove_id,wx,0
+	return
+
+*cursor_afire
+	if ky&$100 : return
+	cur_mode=0
+	return
+
