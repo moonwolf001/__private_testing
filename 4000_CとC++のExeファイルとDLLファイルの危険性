@@ -1,0 +1,41 @@
+MoonWolf：
+
+2023年秋、アメリカ国家セキュリティー当局は、CとC++、このふたつの言語を名指しで危険視し安全な言語への移行の推奨を始めた。
+CとC++言語により作成された実行ファイル、及びDLLファイルには、攻撃者からみると絶好の脆弱性を与えてしまう。
+プログラムにひとつでもCとC++の実行ファイルやDLLファイルがあると、それを使うシステム、それにつながる機器にまで影響は及ぶ。
+結果として、悪意のあるものにメモリーを操作され、システムの破壊、マルウェアの埋め込み、機密情報、個人情報の漏洩などが発生するなどの被害が予測される。
+
+公式ドキュメント：National Cybersecurity Strategy from the White House
+https://www.whitehouse.gov/wp-content/uploads/2023/03/National-Cybersecurity-Strategy-2023.pdf
+
+
+ChatGPT4による概要：
+
+The vulnerabilities associated with C and C++ have gained significant attention globally 
+due to their inherent risks related to memory safety, such as buffer overflows and memory leaks. 
+In the U.S., for example, the White House has urged developers to move away from these languages 
+and adopt more secure, memory-safe alternatives like Rust, Go, or C# to mitigate risks related to cyberattacks. 
+The primary concern is that C and C++ do not provide built-in safeguards to prevent unsafe memory access, 
+which can be exploited by attackers, leading to significant security breaches.
+
+However, despite these risks, many systems, particularly older government and infrastructure systems, 
+continue to rely on C and C++, mainly due to the complexity and cost of migrating to newer languages. 
+Even though regular updates and patches can mitigate some vulnerabilities, 
+the underlying risks remain unless the software is rewritten in safer languages.
+
+In Japan, though no specific government directive directly mirrors the U.S. stance, 
+there is growing awareness around cybersecurity and software vulnerabilities, especially in light of global trends. 
+The challenge for Japanese organizations, like many worldwide, 
+is ensuring that security patches are regularly applied to mitigate vulnerabilities in C and C++-based systems​(
+Snyk　
+https://snyk.io/jp/blog/top-5-c-security-risks/
+)​(
+Tech Startups
+https://techstartups.com/2024/02/28/white-house-urges-developers-to-move-away-from-c-c-yet-many-federal-agencies-still-run-on-65-year-old-cobol/
+).
+
+While it is not uncommon for older systems to rely on C and C++, the trend is 
+moving towards modernizing these environments with memory-safe languages 
+to reduce exposure to potential cyber threats. For developers working with HSP3 
+or any system that utilizes C and C++-based DLLs, maintaining up-to-date security patches 
+and considering safer programming practices are crucial steps.
