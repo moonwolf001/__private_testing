@@ -15,3 +15,7 @@ Lazarus 3.0
 SQLite3
 Windows 11
 
+SQLite3に関して、接続、テーブル表示、クエリ―結果表示、テーブルの変更など行うが、
+SQLConnectionの部分を変えると、オラクルDB、MySQL、MS SQL Serverなど、他のDBでのつぶしがきく。
+このLazarusの汎用性があるため、書籍化に踏み切る。
+どれだけ、視覚的にプログラムを作成する能力をLazarus/Delphiが持つか世に問いたい。
