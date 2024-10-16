@@ -23,4 +23,15 @@ begin
   SQLite3Connection1.Connected:=True;
 end;
                   
+These two lines enable you to connect your SQL DB at Object inspector
 
+1. place SQLite3Connection1
+2. check the connection by Object inspector --> fail with error, check your sql.dll installation, this message is false 
+3. Select form1 and open the ivent, select onCreate
+4. Write below two lines in the procedure
+
+  SQLite3Connection1.DatabaseName := 'TEST01';
+  SQLite3Connection1.Connected:=True;
+
+5. Compile the program
+6. check the connection again at the object inspector. connection1 connected -> ture
