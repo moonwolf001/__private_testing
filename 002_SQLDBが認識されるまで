@@ -25,6 +25,7 @@ end;
                   
 These two lines enable you to connect your SQL DB at Object inspector
 
+0. Start new project, new -> Project -> Application
 1. place SQLite3Connection1
 2. check the connection by Object inspector --> fail with error, check your sql.dll installation, this message is false 
 3. Select form1 and open the ivent, select onCreate
