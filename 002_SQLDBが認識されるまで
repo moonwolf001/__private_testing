@@ -1,0 +1,26 @@
+MoonWolfです。
+
+
+Lazarus SQL DB　－＞ SQLite3接続
+
+Form1に以下を準備
+・SQLite3Connection
+・SQLTransaction
+・SQLQuery
+・DataSource
+・DBGrid
+・DBNavigator
+
+※SQLQueryにはあらかじめ、SQL文を入れておくこと。
+
+設置してセットアップしても、オブジェクトインスペクターよりConnectionができない。
+
+以下を、Form1のOnCreate部分に記載することにより、オブジェクトインスペクターより各コンポーネントの接続が可能となる
+
+procedure TForm1.FormCreate(Sender: TObject);
+begin
+  SQLite3Connection1.DatabaseName := 'TEST01';
+  SQLite3Connection1.Connected:=True;
+end;
+                  
+
