@@ -3,12 +3,14 @@ MoonWolf（むーんうるふ）です
 
 DB関連のコンポーネントのセットアップをここにまとめます。
 
+コンポーネントの場所はこちら、この順番で追加していけばよい。
+
 SQLdb Tab -> TSQLite3Connection
 SQLdb Tab -> TSQLTransaction
 SQLdb Tab -> TSQLQuery
 Data Access Tab -> TDataSource
-Data Controls -> TDBGrid
-Data Controls -> TDBNavigator
+Data Controls Tab -> TDBGrid
+Data Controls Tab -> TDBNavigator
 
 Form1に設置後
 SQLite3Connection1
