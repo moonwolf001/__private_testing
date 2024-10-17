@@ -4,6 +4,7 @@ MoonWolf（むーんうるふ）です
 DB関連のコンポーネントのセットアップをここにまとめます。
 
 コンポーネントの場所はこちら、この順番で追加していけばよい。
+DBGridが複数、Form1に含まれる場合、SQLQueryから先も複数準備する。詳細説明は後程。
 
 SQLdb Tab -> TSQLite3Connection
 SQLdb Tab -> TSQLTransaction
