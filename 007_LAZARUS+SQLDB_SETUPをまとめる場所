@@ -1,0 +1,29 @@
+MoonWolf（むーんうるふ）です
+
+
+DB関連のコンポーネントのセットアップをここにまとめます。
+
+SQLdb Tab -> TSQLite3Connection
+SQLdb Tab -> TSQLTransaction
+SQLdb Tab -> TSQLQuery
+Data Access Tab -> TDataSource
+Data Controls -> TDBGrid
+Data Controls -> TDBNavigator
+
+Form1に設置後
+SQLite3Connection1
+SQLTransaction1
+SQLQuery1
+DBGrid1
+DBNavigator1
+
+
+SQLite3Connection1
+設置後、コードより
+procedure TForm1.FormCreate(Sender: TObject);
+begin
+  SQLite3Connection1.DatabaseName := 'TEST01';
+  SQLite3Connection1.Connected:=True;
+end;       
+これをコンパイル＋実行すると、LazarusはSQLite3.dllを認識うる。Connetionのインスペクターより接続のOnOffが可能となる。
+
