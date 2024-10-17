@@ -26,4 +26,7 @@ begin
   SQLite3Connection1.Connected:=True;
 end;       
 これをコンパイル＋実行すると、LazarusはSQLite3.dllを認識うる。Connetionのインスペクターより接続のOnOffが可能となる。
+※この接続が可能となった状態をどこで管理しているのかChatGPT4と一緒に探したものの、具体的には判明しなかった。
+
+
 
