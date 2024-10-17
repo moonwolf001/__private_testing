@@ -28,5 +28,19 @@ end;
 これをコンパイル＋実行すると、LazarusはSQLite3.dllを認識うる。Connetionのインスペクターより接続のOnOffが可能となる。
 ※この接続が可能となった状態をどこで管理しているのかChatGPT4と一緒に探したものの、具体的には判明しなかった。
 
+これでもNGな場合、Lazarusを再起動
+
+接続が完成した場合：
+
+SQLQueryにてSQLプロパティーを設定　　SELECT * FROM Student_Profies   ここにSQLの終わりの；を入れてはいけない。これではまる人もいる。
+
+[1] しかし、TEXTのデータがすべて(MEMO)で表示　　－－＞解決：DBGrid Options　－＞ dgDisplayMemoText := True
+[2] フィールド幅がすべて同じ　　　　　　　　　　 ーー＞解決：DBGrid Options  ー＞ dgAutoSizeColumns := Ture
+
+これで、とりあえずテーブルのいい感じの表示は可能となる。
+
+しかし、まだ、テーブルの更新ができない。DBNavigator上で操作しても、リフレッシュでエラーとなる。
+
+ここの解決策が必要：
 
 
