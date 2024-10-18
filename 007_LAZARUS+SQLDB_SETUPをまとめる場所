@@ -50,6 +50,23 @@ SQLQueryにてSQLプロパティーを設定　　SELECT * FROM Student_Profies 
 SQlite3は１ユーザーなので、オブジェクトインスペクターでの接続を切るとよくなる。（ここはテスト中）
 ※オブジェクトインスペクターより実行中に切断するとAccess violation,  設計時に切断すると今度は実行時に表示しないー＞要解決
 
+オブジェクトインスペクター経由でフォームデザイナーに表示するのは、表示だけならばよいがUpdate、などの変更があるとNG
+
+それを解決するために、Form1の onCreate にてSQL文の内容は表示させる
+
+// SQLクエリを設定してオープン
+  SQLQuery1.SQL.Text := 'SELECT * FROM student_profiles';
+  SQLQuery1.Open;      
+
+そして、オブジェクトインスペクターとDBの接続を切る。実行中に切ると、Access Violation.
+実行を止めてから、接続を切ること。Connectionを着ると、Transaction,Queryともに自動で切れる。
+
+その状態：
+１、OnCreateでDBのQuery内容はDBGridに表示している
+２、オブジェクトインスペクターをつかったフォームへの表示を切断
+
+これらの上で、以下のAfterPostのProcedureを実行すると、DBが見事にDBGridとDBNavigatorでフィールドが更新される
+
 procedure TForm1.SQLQuery1AfterPost(DataSet: TDataSet);
 begin
   // 変更を適用
