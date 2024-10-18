@@ -47,7 +47,8 @@ SQLQueryにてSQLプロパティーを設定　　SELECT * FROM Student_Profies 
 
 ここの解決策が必要：
 以下をついかするが、Database is locked とエラーとなる。
-SQlite3は１ユーザーなので、オブジェクトインスペクターでの接続を切るとよくなる。
+SQlite3は１ユーザーなので、オブジェクトインスペクターでの接続を切るとよくなる。（ここはテスト中）
+※オブジェクトインスペクターより実行中に切断するとAccess violation,  設計時に切断すると今度は実行時に表示しないー＞要解決
 
 procedure TForm1.SQLQuery1AfterPost(DataSet: TDataSet);
 begin
