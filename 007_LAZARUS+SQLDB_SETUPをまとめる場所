@@ -66,6 +66,7 @@ SQlite3は１ユーザーなので、オブジェクトインスペクターで�
 ２、オブジェクトインスペクターをつかったフォームへの表示を切断
 
 これらの上で、以下のAfterPostのProcedureを実行すると、DBが見事にDBGridとDBNavigatorでフィールドが更新される
+AfterPostでは、フィールドの更新、レコードの追加には対応できるが、レコードの削除には対応していない
 
 procedure TForm1.SQLQuery1AfterPost(DataSet: TDataSet);
 begin
@@ -81,3 +82,22 @@ begin
     end;
   end;
 end;                  
+
+Lazarus DBは実に慎重につくられている、DBNAVIを使ったレコードの削除にはAfterDeleteが必要
+
+procedure TForm1.SQLQuery1AfterPost(DataSet: TDataSet);
+begin
+  // 変更を適用
+  try
+    SQLQuery1.ApplyUpdates;  // 変更をデータベースに適用
+    SQLTransaction1.CommitRetaining;  // トランザクションをコミットして再利用可能に
+  except
+    on E: Exception do
+    begin
+      ShowMessage('Error updating record: ' + E.Message);
+      SQLTransaction1.RollbackRetaining;  // エラー時にロールバック
+    end;
+  end;
+end;                   
+
+ここまではテストOK!　2024.10.18
