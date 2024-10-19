@@ -85,20 +85,20 @@ end;
 
 Lazarus DBは実に慎重につくられている、DBNAVIを使ったレコードの削除にはAfterDeleteが必要
 
-procedure TForm1.SQLQuery1AfterPost(DataSet: TDataSet);
+procedure TForm1.SQLQuery1AfterDelete(DataSet: TDataSet);
 begin
-  // 変更を適用
+  // 削除を適用
   try
-    SQLQuery1.ApplyUpdates;  // 変更をデータベースに適用
-    SQLTransaction1.CommitRetaining;  // トランザクションをコミットして再利用可能に
+    SQLQuery1.ApplyUpdates;          // 削除をデータベースに適用
+    SQLTransaction1.CommitRetaining; // トランザクションをコミットして再利用可能に
   except
     on E: Exception do
     begin
-      ShowMessage('Error updating record: ' + E.Message);
-      SQLTransaction1.RollbackRetaining;  // エラー時にロールバック
+      ShowMessage('Error deleting record: ' + E.Message);
+      SQLTransaction1.RollbackRetaining; // エラー時にロールバック
     end;
   end;
-end;                   
+end;             
 
 ここまではテストOK!　2024.10.18
 これで、Lazarus＋SQL DB（SQLite3）の大きな山は乗り越えたことになる。
