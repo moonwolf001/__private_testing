@@ -17,6 +17,7 @@ Form1に設置後
 SQLite3Connection1
 SQLTransaction1
 SQLQuery1
+DataSource1
 DBGrid1
 DBNavigator1
 
