@@ -1,0 +1,33 @@
+Lazarus VersionとSQL DBに関係があるのかテストをしていた
+対象： Lazarus Version 2.2.2, 2.2.6, 3.0
+
+ここで最新Version 3.6をインすーとる：
+今までに体験したことがないものであるが、
+何と過去のVersionの 複数のLazarusに微妙に干渉をしてきた、OfficialではLazarus 3.6を奨励
+
+私は過去のLazarusを残してきたが、これを良い機会に
+すべての過去のLazarusを完全削除することにした。
+
+完全削除の手順は以下：
+
+
+[1] Window11のアンインストール機能をつかい削除
+対象：Lazarus 2.2.2, 2.2.6, 3.0, 3.6
+
+[2] Windows11のLazarusプログラム関連ファイルをフォルダーごと削除
+対象例： C:\Lazarus_2_2_2などは、フォルダーごと削除
+
+[3] Windows上に残る、Lazarusキャッシュファイルの削除
+C:\Users\USER\AppData\Local\Lazarus
+
+[4] Lazarusレジストリーの削除
+RegEditを起動
+HKEY_LOCAL_MACHINE\SOFTWARE\lazarus
+このLazarusをフォルダーごと削除
+
+[5] Free Pascal Compilerのアンインストール
+FPC 3.2.2が対象です
+
+
+その後、Lazarus 3.6 を改めてインストールしたところ非常に調子がよい。
+書籍化を進められる状態になる。
