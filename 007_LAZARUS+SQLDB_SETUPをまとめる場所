@@ -111,4 +111,25 @@ end;
 その人たちにLazarusのSQL DBの接続と具体例を示し、実用書としてお役にたてたなら嬉しいもの。
 
 
+SQLQueryのAfterPost　この名前について
+
+DBGridの内容の変更　　　　　SQLQuery
+・Gridの表示の変更　　－＞　AfterPostのイベント実施  ー＞　これでDBGの変更完了
+・SQLQueryへのPost　　　　　ApplyUpdate
+　　　　　　　　　　　　　　 CommitRetaining 
+
+
+CommitRetainingの概念：
+
+Begin Transaction
+SQL1
+SQL2
+SQL3
+CommitRetaining  -- このように部分的確定ができる
+SQL4
+SQL5
+SQL6
+CommitRetaining
+
+
 
