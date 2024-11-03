@@ -1,0 +1,329 @@
+// SQL DB を使ったシンプルなToDoList　V001
+// 書籍化にはもっとシンプルに、優先順位と、緊急度を減らして、Edit1からの入力のみを求めるVersion010以降が必要
+// これでもシンプルですが、初心者は敬遠してしまうかもしれない
+
+----------------------------------------------------------------------------------
+unit Unit1;
+
+{$mode objfpc}{$H+}
+
+interface
+
+uses
+  Classes, SysUtils, SQLite3Conn, SQLDB, DB, Forms, Controls, Graphics, Dialogs,
+  DBGrids, DBCtrls, StdCtrls;
+
+type
+
+  { TForm1 }
+
+  TForm1 = class(TForm)
+    Button1: TButton;
+    ComboBox1: TComboBox;
+    ComboBox2: TComboBox;
+    DataSource1: TDataSource;
+    DBGrid1: TDBGrid;
+    DBNavigator1: TDBNavigator;
+    Edit1: TEdit;
+    Label1: TLabel;
+    Label2: TLabel;
+    SQLite3Connection1: TSQLite3Connection;
+    SQLQuery1: TSQLQuery;
+    SQLTransaction1: TSQLTransaction;
+    procedure Button1Click(Sender: TObject);
+    procedure ComboBox1Change(Sender: TObject);
+    procedure DBLookupListBox1Click(Sender: TObject);
+    procedure FormCreate(Sender: TObject);
+    procedure Label1Click(Sender: TObject);
+    procedure SQLQuery1AfterDelete(DataSet: TDataSet);
+    procedure SQLQuery1AfterPost(DataSet: TDataSet);
+  private
+
+  public
+
+  end;
+
+var
+  Form1: TForm1;
+
+implementation
+
+{$R *.lfm}
+
+{ TForm1 }
+
+procedure TForm1.DBLookupListBox1Click(Sender: TObject);
+begin
+
+end;
+
+procedure TForm1.FormCreate(Sender: TObject);
+begin
+  SQLQuery1.SQL.Text := 'SELECT * from todo_list';
+  SQLQuery1.Open;
+end;
+
+procedure TForm1.Label1Click(Sender: TObject);
+begin
+
+end;
+
+procedure TForm1.SQLQuery1AfterDelete(DataSet: TDataSet);
+begin
+  SQLQuery1.ApplyUpdates;          // 削除をデータベースに適用
+  SQLTransaction1.CommitRetaining; // トランザクションをコミットして再利用可能に
+end;
+
+procedure TForm1.SQLQuery1AfterPost(DataSet: TDataSet);
+begin
+  SQLQuery1.ApplyUpdates;  // 変更をデータベースに適用
+  SQLTransaction1.CommitRetaining;  // トランザクションをコミットして再利用可能に
+end;
+
+procedure TForm1.ComboBox1Change(Sender: TObject);
+begin
+
+end;
+
+procedure TForm1.Button1Click(Sender: TObject);
+begin
+  try
+    // トランザクションがアクティブでない場合は開始
+    if not SQLTransaction1.Active then
+      SQLTransaction1.StartTransaction;
+
+    // SQLQuery1が開いている場合は閉じる
+    if SQLQuery1.Active then
+      SQLQuery1.Close;
+
+    // SQL文を設定
+    SQLQuery1.SQL.Text := 'INSERT INTO todo_list (flag, Priority, Urgency, Description) ' +
+                          'VALUES (:flag, :Priority, :Urgency, :Description)';
+
+    // パラメータに値を設定
+    SQLQuery1.Params.ParamByName('flag').AsInteger := 1; // Flag=1
+    SQLQuery1.Params.ParamByName('Priority').AsString := ComboBox1.Text; // 重要度
+    SQLQuery1.Params.ParamByName('Urgency').AsString := ComboBox2.Text; // 緊急度
+    SQLQuery1.Params.ParamByName('Description').AsString := Edit1.Text; // Todoの内容
+
+    // SQL文を実行
+    SQLQuery1.ExecSQL;
+
+    // トランザクションをコミット
+    SQLTransaction1.Commit;
+
+    // データのリフレッシュ
+    SQLQuery1.SQL.Text := 'SELECT * FROM todo_list';
+    SQLQuery1.Open;
+
+  except
+    on E: Exception do
+    begin
+      ShowMessage('Error adding new todo: ' + E.Message);
+      SQLTransaction1.Rollback;  // エラー時にロールバック
+    end;
+  end;
+end;
+
+end.
+----------------------------------------------------------------------------------
+
+// 以下　念のため
+
+----------------------------------------------------------------------------------
+// LRM フォームファイル　オブジェクトインスペクターの設定など
+
+object Form1: TForm1
+  Left = 330
+  Height = 516
+  Top = 117
+  Width = 475
+  Caption = 'Form1 MoonWolf TodoList v.001'
+  ClientHeight = 516
+  ClientWidth = 475
+  OnCreate = FormCreate
+  LCLVersion = '3.6.0.0'
+  object DBGrid1: TDBGrid
+    Left = 24
+    Height = 304
+    Top = 24
+    Width = 408
+    Color = clWindow
+    Columns = <>
+    DataSource = DataSource1
+    Options = [dgEditing, dgTitles, dgIndicator, dgColumnResize, dgColumnMove, dgColLines, dgRowLines, dgTabs, dgAlwaysShowSelection, dgConfirmDelete, dgCancelOnExit, dgAutoSizeColumns, dgDisplayMemoText]
+    TabOrder = 0
+  end
+  object DBNavigator1: TDBNavigator
+    Left = 32
+    Height = 25
+    Top = 336
+    Width = 241
+    BevelOuter = bvNone
+    ChildSizing.EnlargeHorizontal = crsScaleChilds
+    ChildSizing.EnlargeVertical = crsScaleChilds
+    ChildSizing.ShrinkHorizontal = crsScaleChilds
+    ChildSizing.ShrinkVertical = crsScaleChilds
+    ChildSizing.Layout = cclLeftToRightThenTopToBottom
+    ChildSizing.ControlsPerLine = 100
+    ClientHeight = 25
+    ClientWidth = 241
+    DataSource = DataSource1
+    Options = []
+    TabOrder = 1
+    VisibleButtons = [nbFirst, nbPrior, nbNext, nbLast, nbDelete, nbPost, nbRefresh]
+  end
+  object ComboBox1: TComboBox
+    Left = 88
+    Height = 23
+    Top = 368
+    Width = 96
+    ItemHeight = 15
+    ItemIndex = 0
+    Items.Strings = (
+      'High'
+      'Low'
+    )
+    TabOrder = 2
+    Text = 'High'
+    OnChange = ComboBox1Change
+  end
+  object ComboBox2: TComboBox
+    Left = 256
+    Height = 23
+    Top = 368
+    Width = 100
+    ItemHeight = 15
+    ItemIndex = 0
+    Items.Strings = (
+      'High'
+      'Low'
+    )
+    TabOrder = 3
+    Text = 'High'
+  end
+  object Label1: TLabel
+    Left = 48
+    Height = 15
+    Top = 368
+    Width = 36
+    Caption = '重要度'
+    OnClick = Label1Click
+  end
+  object Label2: TLabel
+    Left = 216
+    Height = 15
+    Top = 368
+    Width = 36
+    Caption = '緊急度'
+  end
+  object Button1: TButton
+    Left = 368
+    Height = 55
+    Top = 368
+    Width = 75
+    Caption = 'Button1'
+    TabOrder = 4
+    OnClick = Button1Click
+  end
+  object Edit1: TEdit
+    Left = 56
+    Height = 23
+    Top = 400
+    Width = 296
+    TabOrder = 5
+    Text = 'Edit1'
+  end
+  object SQLite3Connection1: TSQLite3Connection
+    Connected = True
+    LoginPrompt = False
+    DatabaseName = 'test01'
+    KeepConnection = False
+    Transaction = SQLTransaction1
+    AlwaysUseBigint = False
+    Left = 48
+    Top = 456
+  end
+  object SQLTransaction1: TSQLTransaction
+    Active = True
+    Database = SQLite3Connection1
+    Left = 144
+    Top = 456
+  end
+  object SQLQuery1: TSQLQuery
+    MaxIndexesCount = 4
+    FieldDefs = <    
+      item
+        Name = 'ID'
+        DataType = ftAutoInc
+        Precision = -1
+      end    
+      item
+        Name = 'flag'
+        DataType = ftInteger
+        Precision = -1
+      end    
+      item
+        Name = 'Priority'
+        DataType = ftMemo
+        Precision = -1
+      end    
+      item
+        Name = 'Urgency'
+        DataType = ftMemo
+        Precision = -1
+      end    
+      item
+        Name = 'Description'
+        DataType = ftMemo
+        Precision = -1
+      end>
+    AutoCalcFields = False
+    AfterDelete = SQLQuery1AfterDelete
+    AfterPost = SQLQuery1AfterPost
+    Database = SQLite3Connection1
+    Transaction = SQLTransaction1
+    SQL.Strings = (
+      'select * from todo_list'
+    )
+    Params = <>
+    Macros = <>
+    Left = 240
+    Top = 456
+  end
+  object DataSource1: TDataSource
+    DataSet = SQLQuery1
+    Left = 320
+    Top = 456
+  end
+end
+
+----------------------------------------------------------------------------------
+// Lazarus Project file   これが正味のメインファイル  
+
+program project1;
+
+{$mode objfpc}{$H+}
+
+uses
+  {$IFDEF UNIX}
+  cthreads,
+  {$ENDIF}
+  {$IFDEF HASAMIGA}
+  athreads,
+  {$ENDIF}
+  Interfaces, // this includes the LCL widgetset
+  Forms, unit1
+  { you can add units after this };
+
+{$R *.res}
+
+begin
+  RequireDerivedFormResource:=True;
+  Application.Scaled:=True;
+  Application.Initialize;
+  Application.CreateForm(TForm1, Form1);
+  Application.Run;
+end.
+
+----------------------------------------------------------------------------------
