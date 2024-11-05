@@ -1,6 +1,9 @@
 // ToDoList Lv10 原案の卵。
 // 重要度＆緊急度マップを加えて同時複数案件を対処できるように鍛える。
 
+// 経験：
+// high High だででもダメ、SQLDBとLAZARUSは区別しなくても文字列として別扱いとか
+
 unit Unit1;
 
 {$mode objfpc}{$H+}
