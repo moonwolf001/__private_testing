@@ -1,0 +1,15 @@
+-- ToDoList Lv10 向けに、色々テーブルとデータを作成して実験を繰り返します
+
+
+CREATE TABLE ToDoList10 (
+    id INTEGER PRIMARY KEY,
+    Pri TEXT,
+    Urg TEXT,
+    ToDo TEXT
+);
+
+INSERT INTO ToDoList10 (id, Pri, Urg, ToDo) VALUES
+(1, 'high', 'high', 'これは H  H の内容'),
+(2, 'high', 'low', 'これはH Lの内容'),
+(3, 'low', 'high', 'これはL Hの内容'),
+(4, 'low', 'low', 'これはL Lの内容');
