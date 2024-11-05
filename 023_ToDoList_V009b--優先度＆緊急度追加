@@ -3,6 +3,8 @@
 
 // 経験：
 // high High だででもダメ、SQLDBとLAZARUSは区別しなくても文字列として別扱いとか
+// DBGrid1-4 +5 の表示 update のProcedrueを作り操作をまとめるべき onCreate も含む
+// onCreate の操作が本用に流用できなのか？GPT4の能力も疑う
 
 unit Unit1;
 
