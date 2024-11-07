@@ -1,1 +1,18 @@
 
+# プログラム入門①：
+
+print('MoonWolf : プログラム入門①')
+
+print('<整数操作>')
+print('こんにちは')
+print(100)
+num1 = 5
+print(num1)
+num2 = 100
+print( num1, num2)
+total = num1 + num2
+print(total)
+
+print('------------------------')
+print('<文字列操作>')
+
