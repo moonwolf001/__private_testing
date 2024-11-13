@@ -81,3 +81,11 @@ for i in range(3,5):
 print('Pythonのin range()ってクセがあるね！')
 print('in range(3,5) とは、３以上であり、５未満だね。「この５未満に注意！」')
 
+print('\n\n')
+
+print('for i in range(2,14,3) を表示してみるよ 2,5,8,11')
+# in range( 開始値, その数未満の終了値, ステップ値 )
+for i in range(2,14,3):
+    print(i)
+
+#　以上で、forと in range( a, b, c )の使い方の説明は終了。
