@@ -1,0 +1,51 @@
+# MoonWolf(むーんうるふ)です。 2024.11.12
+# 何とか簡単なモデルでTensorFlowを動かして制御することを目的としています。
+# 過去に成功事例なし。この例では、Nの２乗を学習させます。そして新にMを入れた場合、同じような結果になるか検証します。まだ精度悪し。
+# 以下必要
+# pip install tensorflow
+# pip install matplotlib
+
+import numpy as np
+import tensorflow as tf
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import Dense
+from tensorflow.keras.optimizers import Adam
+import matplotlib.pyplot as plt
+
+# 1. より広い学習用データの準備（NとN^2のペア）
+N_values = np.arange(1, 21)  # N = 1, 2, ..., 20
+N_squares = np.square(N_values)  # N^2 の結果: 1, 4, 9, ..., 400
+
+# 2. モデルの構築（層とユニットを増加）
+model = Sequential([
+    Dense(32, input_dim=1, activation='relu'),
+    Dense(64, activation='relu'),
+    Dense(32, activation='relu'),
+    Dense(1)  # 出力層
+])
+
+# モデルのコンパイル（学習率を0.001に調整）
+model.compile(optimizer=Adam(learning_rate=0.001), loss='mse')
+
+# 3. データの整形
+X_train = N_values.reshape(-1, 1)  # 入力データを2Dに変換
+y_train = N_squares  # 出力データはそのまま使用
+
+# 4. モデルの学習（エポック数を500に増加）
+history = model.fit(X_train, y_train, epochs=500, verbose=1)
+
+# 5. 学習過程の損失を可視化
+plt.plot(history.history['loss'])
+plt.title('Model Training Loss')
+plt.xlabel('Epoch')
+plt.ylabel('Loss')
+plt.show()
+
+# 6. 新しい値でモデルをテスト
+new_values = np.array([11, 12, 13, 21, 25]).reshape(-1, 1)
+predictions = model.predict(new_values)
+
+# 結果の表示
+print("\n新しい値での予測結果:")
+for N, pred in zip(new_values.flatten(), predictions.flatten()):
+    print(f"N = {N}, 予測された N^2 = {pred:.2f}")
