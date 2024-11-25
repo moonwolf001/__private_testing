@@ -1,0 +1,32 @@
+procedure TForm1.Button1Click(Sender: TObject);
+begin
+  // データセットを閉じる
+  SQLQuery1.Close;
+
+ // INSERT文を設定して実行
+
+ // '''による実行
+ //SQLQuery1.SQL.Text :=  'INSERT INTO Student (name, city) VALUES (''' + Edit1.Text + ''', ''' + Edit2.Text + ''')';
+
+ // "による実行
+ // SQLQuery1.SQL.Text := 'INSERT INTO Student (name, city) VALUES ("'  + Edit1.Text + '", "' + Edit2.Text  + '")';
+
+
+ // Paramクエリーを使用してSQL文を設定
+  SQLQuery1.SQL.Text := 'INSERT INTO Student (name, city) VALUES (:Name, :City)';
+
+  // パラメータに値を代入
+  SQLQuery1.Params.ParamByName('Name').AsString := Edit1.Text;  // Edit1の内容を :Name に設定
+  SQLQuery1.Params.ParamByName('City').AsString := Edit2.Text;  // Edit2の内容を :City に設定
+
+
+  SQLQuery1.ExecSQL;
+
+  // トランザクションをコミット
+  SQLTransaction1.Commit;
+
+  // データセットを再度開いて、DBGridを更新
+  SQLQuery1.SQL.Text := 'SELECT * FROM Student';
+  SQLQuery1.Open;
+end;
+                    
