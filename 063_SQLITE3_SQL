@@ -1,0 +1,31 @@
+
+-- テーブルの作成
+CREATE TABLE table_name (
+    column1 datatype PRIMARY KEY,
+    column2 datatype NOT NULL,
+    column3 datatype DEFAULT value
+);
+
+-- テーブルへのデータ挿入
+INSERT INTO table_name (column1, column2) VALUES (value1, value2);
+
+-- テーブル内容の更新
+UPDATE table_name
+SET column1 = value1, column2 = value2
+WHERE condition;
+
+-- レコードの削除
+DELETE FROM table_name WHERE condition;
+
+-- テーブル内容の表示
+SELECT column1, column2 FROM table_name WHERE condition;
+
+SELECT * FROM table_name;
+SELECT name FROM sqlite_master WHERE type='table';
+SELECT * FROM table_name ORDER BY column1 ASC; -- DESCも可能
+
+-- テーブルの削除　※すべて消えるので注意
+DROP TABLE table_name;
+
+-- テーブルへの列の追加　※列の削除、列の変更はSQLITE3はない。その際にはテーブルを作り直すべし。
+ALTER TABLE table_name ADD COLUMN new_column datatype;
