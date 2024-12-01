@@ -1,0 +1,157 @@
+unit Unit1;
+
+{$mode objfpc}{$H+}
+
+interface
+
+uses
+  Classes, SysUtils, SQLite3Conn, SQLDB, DB, Forms, Controls, Graphics, Dialogs,
+  StdCtrls, DBGrids, DBCtrls,      DateUtils;//追加;
+type
+
+  { TForm1 }
+
+  TForm1 = class(TForm)
+    Button1: TButton;
+    Button2: TButton;
+    DataSource1: TDataSource;
+    DBGrid1: TDBGrid;
+    DBMemo1: TDBMemo;
+    DBNavigator1: TDBNavigator;
+    Edit1: TEdit;
+    Edit2: TEdit;
+    GroupBox1: TGroupBox;
+    Label1: TLabel;
+    Memo1: TMemo;
+    SQLite3Connection1: TSQLite3Connection;
+    SQLQuery1: TSQLQuery;
+    SQLTransaction1: TSQLTransaction;
+    procedure Button1Click(Sender: TObject);
+    procedure Button2Click(Sender: TObject);
+    procedure FormCreate(Sender: TObject);
+    procedure SQLQuery1AfterDelete(DataSet: TDataSet);
+    procedure SQLQuery1AfterPost(DataSet: TDataSet);
+  private
+
+  public
+
+  end;
+
+var
+  Form1: TForm1;
+
+implementation
+
+{$R *.lfm}
+
+{ TForm1 }
+
+procedure TForm1.Button1Click(Sender: TObject);
+var
+  currentDate, currentTime: string;
+begin
+  // Uses に DateUtils 追加;
+  // 現在の日付と時間を取得
+  currentDate := FormatDateTime('yyyymmdd', Now); // 日付: YYYYMMDD形式
+  currentTime := FormatDateTime('hhnn', Now);     // 時間: HHMM形式
+
+  // Memo1の内容が空の場合は挿入しない
+  if Trim(Memo1.Text) = '' then
+  begin
+    ShowMessage('Please enter some text in Memo1.');
+    Exit;
+  end;
+
+  // SQLクエリを準備
+  SQLQuery1.Close;
+  SQLQuery1.SQL.Text := 'INSERT INTO DATA (date, time, text) VALUES (:date, :time, :text)';
+
+  // パラメータに値を設定
+  SQLQuery1.ParamByName('date').AsString := currentDate;  // 日付をバインド
+  SQLQuery1.ParamByName('time').AsString := currentTime;  // 時間をバインド
+  SQLQuery1.ParamByName('text').AsString := Memo1.Text;   // メモ内容をバインド
+
+  // クエリ実行
+  SQLQuery1.ExecSQL;
+
+  // トランザクションをコミット
+  SQLTransaction1.Commit;
+
+  // データを再取得してDBGridを更新
+  SQLQuery1.Close;
+  SQLQuery1.SQL.Text := 'SELECT * FROM DATA';
+  SQLQuery1.Open;
+
+  // 完了メッセージ
+  //ShowMessage('Record added successfully.');
+end;
+
+procedure TForm1.Button2Click(Sender: TObject);
+var
+  searchQuery: string;
+  param1, param2: string;
+begin
+  // Edit1とEdit2の内容を取得
+  param1 := Trim(Edit1.Text);
+  param2 := Trim(Edit2.Text);
+
+  // 場合分け開始
+  if (param1 = '') and (param2 = '') then
+  begin
+    // **Case 1: Edit1なし、Edit2なし（全件表示）**
+    searchQuery := 'SELECT * FROM DATA';
+  end
+  else if (param1 = '') and (param2 <> '') then
+  begin
+    // **Case 2: Edit1なし、Edit2あり（Edit2で検索）**
+    searchQuery := 'SELECT * FROM DATA WHERE text LIKE :param2';
+  end
+  else if (param1 <> '') and (param2 = '') then
+  begin
+    // **Case 3: Edit1あり、Edit2なし（Edit1で検索）**
+    searchQuery := 'SELECT * FROM DATA WHERE text LIKE :param1';
+  end
+  else
+  begin
+    // **Case 4: Edit1あり、Edit2あり（Edit1とEdit2の両方で検索）**
+    searchQuery := 'SELECT * FROM DATA WHERE text LIKE :param1 AND text LIKE :param2';
+  end;
+
+  // クエリを設定
+  SQLQuery1.Close;
+  SQLQuery1.SQL.Text := searchQuery;
+
+  // パラメータを設定
+  if param1 <> '' then
+    SQLQuery1.ParamByName('param1').AsString := '%' + param1 + '%';
+  if param2 <> '' then
+    SQLQuery1.ParamByName('param2').AsString := '%' + param2 + '%';
+
+  // クエリを実行して結果を表示
+  SQLQuery1.Open;
+end;
+
+
+
+procedure TForm1.FormCreate(Sender: TObject);
+begin
+  SQLQuery1.Close;
+  SQLQuery1.SQL.Text := 'SELECT * FROM DATA';
+  SQLQuery1.Open;
+end;
+
+procedure TForm1.SQLQuery1AfterDelete(DataSet: TDataSet);
+begin
+  SQLQuery1.ApplyUpdates;
+  SQLTransaction1.CommitRetaining;
+  SQLQuery1.Last;
+end;
+
+procedure TForm1.SQLQuery1AfterPost(DataSet: TDataSet);
+begin
+  SQLQuery1.ApplyUpdates;
+  SQLTransaction1.CommitRetaining;
+  SQLQuery1.Last;
+end;
+
+end.
