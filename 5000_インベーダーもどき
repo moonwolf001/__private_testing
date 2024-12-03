@@ -1,0 +1,129 @@
+; スペースインベーダー風ゲーム
+; by ChatGPT4 // 当たり判定は動作しない
+; カーソールで左右移動、スペースで弾
+
+
+; 画面サイズ設定
+screen_width = 40
+screen_height = 20
+
+; 自機の設定
+player_x = screen_width / 2
+player_y = screen_height - 1
+
+; 弾の設定
+dim bullets_x, 10
+dim bullets_y, 10
+bullet_count = 0
+
+; 敵の設定
+enemy_rows = 3
+enemy_cols = 8
+dim enemies, enemy_cols, enemy_rows
+enemy_x = 0
+enemy_y = 2
+enemy_direction = 1  ; 敵の移動方向 (1: 右, -1: 左)
+
+; 敵の配置初期化
+repeat enemy_rows
+    repeat enemy_cols
+        enemies(cnt2, cnt) = 1
+    loop
+loop
+
+; ゲームの初期化
+title "スペースインベーダー (弾と敵の当たり判定修正)"
+screen 0, screen_width * 10, screen_height * 20
+cls 0
+
+*main
+    redraw 0
+    cls 0
+
+    ; 自機の描画
+    pos player_x * 10, player_y * 20
+    mes "+"
+
+    ; 弾の描画と移動
+    repeat bullet_count
+        if bullets_y(cnt) >= 0 {
+            bullets_y(cnt) -= 1
+            pos bullets_x(cnt) * 10, bullets_y(cnt) * 20
+            mes "!"
+
+            ; 弾と敵の当たり判定
+            repeat enemy_rows
+                repeat enemy_cols
+                    if enemies(cnt2, cnt3) = 1 {  ; 敵が存在する場合のみ判定
+                        enemy_x_pos = cnt3 * 4 + enemy_x
+                        enemy_y_pos = cnt2 * 2 + enemy_y
+
+                        ; 弾が敵の位置と一致した場合
+                        if bullets_x(cnt) >= enemy_x_pos & bullets_x(cnt) < enemy_x_pos + 4 {
+                            if bullets_y(cnt) >= enemy_y_pos & bullets_y(cnt) < enemy_y_pos + 2 {
+                                enemies(cnt2, cnt3) = 0  ; 敵を消す
+                                bullets_y(cnt) = -1     ; 弾を無効化
+                            }
+                        }
+                    }
+                loop
+            loop
+        }
+    loop
+
+    ; 敵の描画と移動
+    enemy_x += enemy_direction
+    if enemy_x <= 0 | enemy_x >= screen_width - (enemy_cols * 4) {
+        enemy_direction = -enemy_direction
+        enemy_y += 1
+    }
+    repeat enemy_rows
+        repeat enemy_cols
+            if enemies(cnt2, cnt) = 1 {
+                x = cnt * 4 + enemy_x
+                y = cnt2 * 2 + enemy_y
+                pos x * 10, y * 20
+                mes "@"
+            }
+        loop
+    loop
+
+    ; キー入力処理
+    getkey left_key, 37            ; 左矢印キー
+    getkey right_key, 39           ; 右矢印キー
+    getkey space_key, 32           ; スペースキー
+    if left_key & player_x > 0 : player_x -= 1     ; 左に移動
+    if right_key & player_x < screen_width - 1 : player_x += 1 ; 右に移動
+    if space_key & bullet_count < 10 {            ; スペースキーで弾発射
+        bullets_x(bullet_count) = player_x
+        bullets_y(bullet_count) = player_y - 1
+        bullet_count++
+    }
+
+    ; ゲーム終了判定 (敵が画面下に到達)
+    repeat enemy_rows
+        repeat enemy_cols
+            if enemies(cnt2, cnt) = 1 & (cnt2 * 2 + enemy_y) >= player_y : goto *gameover
+        loop
+    loop
+
+    redraw 1
+    await 100
+    goto *main
+
+*gameover
+title "ゲームオーバー"
+objsize 200, 40
+pos 150, 150 : button "再スタート", *restart
+stop
+
+*restart
+; 敵のリセット
+enemy_x = 0
+enemy_y = 2
+repeat enemy_rows
+    repeat enemy_cols
+        enemies(cnt2, cnt) = 1
+    loop
+loop
+goto *main
