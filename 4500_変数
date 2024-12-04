@@ -1,1 +1,4 @@
 
+整数値に変換  val = int(p1)
+文字列に変換  val = str(p1)
+実数値に変換  val = double(p1)
