@@ -1,1 +1,19 @@
 
+a=10
+	if a=10 : mes "aは10です。"
+
+a=10
+	mes "aは、"
+	if a=10 : mes "10です。" : else : mes "10ではありません。"
+	stop
+
+a=10
+	if a>5 {
+		mes "TRUE"
+		mes "(MULTILINE IF)"
+	}
+	else {
+		mes " FALSE"
+		mes " (MULTILINE IF)"
+	}
+	return
