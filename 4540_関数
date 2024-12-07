@@ -1,1 +1,10 @@
+関数ではないが、BASICのようにgosubルーチン化ができる。サブルーチンの位置はメインルーチンより下でもよい。
 
+*main
+  処理１
+  gosub *sub
+goto *main
+
+*sub
+  処理２
+return
