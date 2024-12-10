@@ -5,8 +5,8 @@
 	kakeru =1
 repeat 9
 	repeat 9
-	    mes str(kakerare) + "x" + str(kakeru) + "=" + str(kakerare*kakeru)
-		  kakeru = kakeru +1
+		mes str(kakerare) + "x" + str(kakeru) + "=" + str(kakerare*kakeru)
+		kakeru = kakeru +1
 	loop
 	kakeru = 1
 	kakerare = kakerare + 1
