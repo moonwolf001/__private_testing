@@ -1,0 +1,178 @@
+import sqlite3
+import tkinter as tk
+from tkinter import ttk, messagebox
+
+# データベースファイル名
+DB_FILE = 'TEST01'  # 拡張子なしのデータベースファイル
+
+# SQLite3 データベース操作クラス
+class Database:
+    def __init__(self, db_file):
+        self.conn = sqlite3.connect(db_file)
+        self.cursor = self.conn.cursor()
+        self.ensure_table()
+
+    def ensure_table(self):
+        """テーブルが存在しない場合は作成する"""
+        self.cursor.execute("""
+        CREATE TABLE IF NOT EXISTS data (
+            id INTEGER PRIMARY KEY,
+            name TEXT,
+            detail TEXT,
+            phone TEXT,
+            email TEXT
+        )
+        """)
+        self.conn.commit()
+
+    def fetch_all(self):
+        self.cursor.execute("SELECT * FROM data")
+        return self.cursor.fetchall()
+
+    def insert_record(self, name, detail, phone, email):
+        self.cursor.execute(
+            "INSERT INTO data (name, detail, phone, email) VALUES (?, ?, ?, ?)",
+            (name, detail, phone, email)
+        )
+        self.conn.commit()
+
+    def update_record(self, record_id, name, detail, phone, email):
+        self.cursor.execute(
+            "UPDATE data SET name=?, detail=?, phone=?, email=? WHERE id=?",
+            (name, detail, phone, email, record_id)
+        )
+        self.conn.commit()
+
+    def close(self):
+        self.conn.close()
+
+
+# アプリケーション
+class App:
+    def __init__(self, root):
+        self.root = root
+        self.db = Database(DB_FILE)
+        self.selected_id = None
+
+        self.root.title("SQLite3 Grid and Field Editor")
+        self.create_widgets()
+
+    def create_widgets(self):
+        # 上部のテーブル表示 (Treeview)
+        self.tree = ttk.Treeview(self.root, columns=('id', 'name', 'detail', 'phone', 'email'), show='headings')
+        self.tree.heading('id', text='ID')
+        self.tree.heading('name', text='Name')
+        self.tree.heading('detail', text='Detail')
+        self.tree.heading('phone', text='Phone')
+        self.tree.heading('email', text='Email')
+        self.tree.bind('<<TreeviewSelect>>', self.on_row_select)
+        self.tree.pack(fill=tk.BOTH, expand=True)
+
+        # 下部のフィールド表示
+        form_frame = tk.Frame(self.root)
+        form_frame.pack(fill=tk.X, padx=5, pady=5)
+
+        tk.Label(form_frame, text="Name:").grid(row=0, column=0, sticky=tk.W, padx=5, pady=2)
+        self.name_entry = tk.Entry(form_frame)
+        self.name_entry.grid(row=0, column=1, sticky=tk.W, padx=5, pady=2)
+
+        tk.Label(form_frame, text="Detail:").grid(row=1, column=0, sticky=tk.W, padx=5, pady=2)
+        self.detail_entry = tk.Entry(form_frame)
+        self.detail_entry.grid(row=1, column=1, sticky=tk.W, padx=5, pady=2)
+
+        tk.Label(form_frame, text="Phone:").grid(row=2, column=0, sticky=tk.W, padx=5, pady=2)
+        self.phone_entry = tk.Entry(form_frame)
+        self.phone_entry.grid(row=2, column=1, sticky=tk.W, padx=5, pady=2)
+
+        tk.Label(form_frame, text="Email:").grid(row=3, column=0, sticky=tk.W, padx=5, pady=2)
+        self.email_entry = tk.Entry(form_frame)
+        self.email_entry.grid(row=3, column=1, sticky=tk.W, padx=5, pady=2)
+
+        # ボタン (保存、新規追加)
+        button_frame = tk.Frame(self.root)
+        button_frame.pack(fill=tk.X, padx=5, pady=5)
+
+        save_button = tk.Button(button_frame, text="Save", command=self.save_record)
+        save_button.pack(side=tk.LEFT, padx=5)
+
+        add_button = tk.Button(button_frame, text="Add New", command=self.add_record)
+        add_button.pack(side=tk.LEFT, padx=5)
+
+        # データのロード
+        self.load_data()
+
+    def load_data(self):
+        # テーブルデータを表示
+        for row in self.tree.get_children():
+            self.tree.delete(row)
+
+        for row in self.db.fetch_all():
+            self.tree.insert('', tk.END, values=row)
+
+    def on_row_select(self, event):
+        # 選択した行を取得
+        selected_item = self.tree.selection()
+        if not selected_item:
+            return
+
+        selected_data = self.tree.item(selected_item)['values']
+        self.selected_id = selected_data[0]
+
+        # フィールドにデータを表示
+        self.name_entry.delete(0, tk.END)
+        self.name_entry.insert(0, selected_data[1])
+
+        self.detail_entry.delete(0, tk.END)
+        self.detail_entry.insert(0, selected_data[2])
+
+        self.phone_entry.delete(0, tk.END)
+        self.phone_entry.insert(0, selected_data[3])
+
+        self.email_entry.delete(0, tk.END)
+        self.email_entry.insert(0, selected_data[4])
+
+    def save_record(self):
+        # 入力された値を取得
+        name = self.name_entry.get()
+        detail = self.detail_entry.get()
+        phone = self.phone_entry.get()
+        email = self.email_entry.get()
+
+        if self.selected_id is None:
+            messagebox.showerror("Error", "No record selected.")
+            return
+
+        # データベースを更新
+        self.db.update_record(self.selected_id, name, detail, phone, email)
+
+        # データの再読み込み
+        self.load_data()
+        messagebox.showinfo("Success", "Record updated successfully.")
+
+    def add_record(self):
+        # 新しいレコードをデータベースに追加
+        name = self.name_entry.get()
+        detail = self.detail_entry.get()
+        phone = self.phone_entry.get()
+        email = self.email_entry.get()
+
+        if not name or not phone:
+            messagebox.showerror("Error", "Name and Phone fields are required.")
+            return
+
+        self.db.insert_record(name, detail, phone, email)
+
+        # データの再読み込み
+        self.load_data()
+        messagebox.showinfo("Success", "New record added successfully.")
+
+    def close(self):
+        self.db.close()
+
+
+# メイン実行部
+if __name__ == "__main__":
+    root = tk.Tk()
+    app = App(root)
+    root.protocol("WM_DELETE_WINDOW", app.close)  # アプリ終了時にDBを閉じる
+    root.mainloop()
