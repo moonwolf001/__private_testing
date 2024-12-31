@@ -1,0 +1,11 @@
+from tkinter import *
+from tkinter import ttk
+
+root = Tk()
+root.title("はじめてのtkinter")
+
+label = ttk.Label(root,text ='Hello Python!')
+label.pack()
+
+#ウィンドウの表示
+root.mainloop()
